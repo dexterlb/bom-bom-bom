@@ -1,10 +1,11 @@
 import tempfile
 import subprocess
+import sexpdata
 
 class KicadBOM:
     @classmethod
     def read_from_sch_file(klass, path: str):
-        with tempfile.NamedTemporaryFile(delete_on_close=False) as netlist_f:
+        with tempfile.NamedTemporaryFile(delete_on_close=False, mode='w+t') as netlist_f:
             convert_cmd = [
                 'kicad-cli', 'sch', 'export', 'netlist',
                 '-o', netlist_f.name,
@@ -20,7 +21,7 @@ class KicadBOM:
 
     @classmethod
     def read_from_netlist(klass, f):
-        return klass(f.read())
+        return klass(sexpdata.load(f))
 
-    def __init__(self, netlist_text: str):
-        self.netlist_text = netlist_text
+    def __init__(self, netlist_sexpr):
+        self.netlist_sexpr = netlist_sexpr
