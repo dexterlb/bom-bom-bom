@@ -17,4 +17,4 @@ dependencies = [
 packages = ["bom-bom-bom"]
 
 [project.scripts]
-bom-bom-bom = "bom-bom-bom:main"
+bom-bom-bom = "bombombom.main:main"
