@@ -19,7 +19,7 @@
           src = ./.;
 
           build-system = [
-            pkgs.python3Packages.setuptools-scm
+            pkgs.python3Packages.hatchling
           ];
 
           dependencies = [
