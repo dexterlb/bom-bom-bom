@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bom-bom-bom"
+version = "0.1"
+description = "Generate KiCAD BOM's from the command line, augmenting them with PartDB data"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "typer",
+  "sexpdata",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["bom-bom-bom"]
+
+[project.scripts]
+bom-bom-bom = "bom-bom-bom:main"
