@@ -11,8 +11,16 @@ def generate_fields_in_groups(groups, gen_settings):
             for f, gen in generators:
                 comp[f] = gen.render(comp)
 
+def filter_groups(groups, filter_specs):
+    filters = [_build_filter(fs) for fs in filter_specs]
+    res = {k: _run_filters_on_components(g, filters) for k, g in groups.items()}
+    return {k: g for k, g in res.items() if g}
+
 def filter_components(components, filter_specs):
     filters = [_build_filter(fs) for fs in filter_specs]
+    return _run_filters_on_components(components, filters)
+
+def _run_filters_on_components(components, filters):
     return [c for c in components if all((flt(c) for flt in filters))]
 
 def _build_filter(filter_spec):
