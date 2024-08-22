@@ -1,5 +1,16 @@
 import jinja2
 
+def generate_fields_in_groups(groups, gen_settings):
+    generators = [
+        (f, jinja2.Template(template_str))
+        for f, template_str in gen_settings.items()
+    ]
+
+    for group in groups.values():
+        for comp in group:
+            for f, gen in generators:
+                comp[f] = gen.render(comp)
+
 def filter_components(components, filter_specs):
     filters = [_build_filter(fs) for fs in filter_specs]
     return [c for c in components if all((flt(c) for flt in filters))]

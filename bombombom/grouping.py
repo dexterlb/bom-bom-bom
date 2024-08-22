@@ -9,6 +9,8 @@ def flatten_groups(groups):
     result = dict()
     for k, g in groups.items():
         result[k] = {f: {c[f] for c in g if f in c} for f in all_fields}
+        result[k]['_qty'] = sum((c['_instance_count'] * c['_board_count']) for c in g)
+        result[k]['_qty_by_board'] = _calc_qty_by_board(g)
     return result
 
 def group_components(components, group_settings):
@@ -29,7 +31,7 @@ def _group_items(comp, group_settings):
     keys = [k.strip() for k in keys]
 
     for k in keys:
-        if group_settings.get('parse_multipliers'):
+        if group_settings.get('parse_instances'):
             cnt, k = _multiplify(k)
         else:
             cnt = 1
@@ -44,3 +46,11 @@ def _multiplify(k):
     if not m:
         return 1, k
     return int(m.group(1)), m.group(2)
+
+def _calc_qty_by_board(components):
+    qtys = defaultdict(int)
+    for c in components:
+        qtys[c['_board_name']] += c['_instance_count']
+    boards = sorted(qtys.keys())
+    return ', '.join((f'{brd}({qtys[brd]})' for brd in boards))
+
