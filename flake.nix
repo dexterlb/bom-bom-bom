@@ -25,6 +25,8 @@
           dependencies = [
             pkgs.python3Packages.typer
             pkgs.python3Packages.sexpdata
+            pkgs.python3Packages.strictyaml
+            pkgs.python3Packages.jinja2
           ];
 
           meta = {

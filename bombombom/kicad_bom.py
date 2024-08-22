@@ -51,24 +51,46 @@ def _make_component_data(sexp, src_name):
         raise RuntimeError(f'this does not look like a component entry (key was {str(sexp[0])})')
     c['ref'] = _find_key(sexp, 'ref')[0]
     c['value'] = _find_key(sexp, 'value')[0]
+
     fieldmap = _find_key(sexp, 'fields')
     c |= dict([_parse_field(f) for f in fieldmap])
+
+    props = _find_keys(sexp, 'property')
+    c |= dict([_parse_prop(p) for p in props])
 
     return c
 
 def _parse_field(sexp):
     if sexp[0].value() != 'field':
         raise RuntimeError(f'this does not look like a field entry (key was {str(sexp[0])})')
-    if sexp[1][0].value() != 'name':
+    return _parse_nameval(sexp[1:])
+
+def _parse_prop(sexp):
+    name, v = _parse_nameval(sexp)
+    if type(v) is list:
+        if v[0].value() != 'value':
+            raise RuntimeError(f'this does not look like a property entry (key was {str(v[0])})')
+        return name, v[1]
+    else:
+        return name, v
+
+def _parse_nameval(sexp):
+    if sexp[0][0].value() != 'name':
         raise RuntimeError('second item in field entry is not called `name`')
-    name = sexp[1][1].lower()
+    name = sexp[0][1].lower()
     try:
-        value = sexp[2]
+        value = sexp[1]
     except IndexError:
         value = None
     return name, value
 
 def _find_key(sexp, k):
+    try:
+        return next(_find_keys(sexp, k))
+    except StopIteration:
+        return None
+
+def _find_keys(sexp, k):
     if type(sexp) is not list:
         return None
     for item in sexp:
@@ -79,5 +101,4 @@ def _find_key(sexp, k):
         if type(item[0]) is not sexpdata.Symbol:
             continue
         if item[0].value() == k:
-            return item[1:]
-    return None
+            yield item[1:]
