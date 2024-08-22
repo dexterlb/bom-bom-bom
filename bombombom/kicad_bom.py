@@ -33,20 +33,21 @@ class KicadBOM:
         return sexpdata.dumps(self.netlist_sexpr, pretty_print=True)
 
     def components(self):
-        src_name = self.src_name()
+        board_name = self.board_name()
         component_sexprs = _find_key(self.netlist_sexpr, 'components')
-        return [_make_component_data(cs, src_name) for cs in component_sexprs]
+        return [_make_component_data(cs, board_name) for cs in component_sexprs]
 
-    def src_name(self):
+    def board_name(self):
         design = _find_key(self.netlist_sexpr, 'design')
         src = _find_key(design, 'source')
         src_filename = src[0]
         basename = os.path.basename(src_filename)
         return basename.removesuffix('.kicad_sch')
 
-def _make_component_data(sexp, src_name):
+def _make_component_data(sexp, board_name):
     c = dict()
-    c['src_name'] = src_name
+    c['_board_name'] = board_name
+    c['_board_count'] = 1   # fixme, get this from somewhere
     if sexp[0].value() != 'comp':
         raise RuntimeError(f'this does not look like a component entry (key was {str(sexp[0])})')
     c['ref'] = _find_key(sexp, 'ref')[0]
