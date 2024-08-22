@@ -9,6 +9,7 @@ from .def_parser import parse_def_file
 from .kicad_bom import KicadBOM
 from .filter import filter_components, generate_fields_in_groups, filter_groups
 from .grouping import group_components, flatten_groups
+from .collapse import collapse_fields_in_flat_groups
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -28,6 +29,7 @@ def cli(
     generate_fields_in_groups(groups, bomdef['generate_fields'])
     groups = filter_groups(groups, bomdef['filter'])
     groups = flatten_groups(groups)
+    groups = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
 
     print(json.dumps(groups, indent=4, cls=SetEncoder))
 
