@@ -8,9 +8,7 @@ def flatten_groups(groups):
     all_fields = set().union(*(set().union(*(set(c.keys()) for c in g)) for g in groups.values()))
     result = dict()
     for k, g in groups.items():
-        result[k] = {f: {c[f] for c in g if f in c} for f in all_fields}
-        result[k]['_qty'] = sum((c['_instance_count'] * c['_board_count']) for c in g)
-        result[k]['_qty_by_board'] = _calc_qty_by_board(g)
+        result[k] = {f: _uniq([c[f] for c in g if f in c]) for f in all_fields}
     return result
 
 def group_components(components, group_settings):
@@ -47,10 +45,8 @@ def _multiplify(k):
         return 1, k
     return int(m.group(1)), m.group(2)
 
-def _calc_qty_by_board(components):
-    qtys = defaultdict(int)
-    for c in components:
-        qtys[c['_board_name']] += c['_instance_count']
-    boards = sorted(qtys.keys())
-    return ', '.join((f'{brd}({qtys[brd]})' for brd in boards))
-
+def _uniq(items):
+    try:
+        return set(items)
+    except TypeError:
+        return [items[0]] # we probably need to assert here that all items are the same somehow

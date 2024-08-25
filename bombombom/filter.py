@@ -1,6 +1,11 @@
 import jinja2
+from collections import defaultdict
 
 def generate_fields_in_groups(groups, gen_settings):
+    _generate_qty_fields_in_groups(groups)
+    _generate_user_fields_in_groups(groups, gen_settings)
+
+def _generate_user_fields_in_groups(groups, gen_settings):
     generators = [
         (f, jinja2.Template(template_str))
         for f, template_str in gen_settings.items()
@@ -10,6 +15,18 @@ def generate_fields_in_groups(groups, gen_settings):
         for comp in group:
             for f, gen in generators:
                 comp[f] = gen.render(comp)
+
+def _generate_qty_fields_in_groups(groups):
+    for name, group in groups.items():
+        qtys_by_board = defaultdict(int)
+        qty = 0
+        for comp in group:
+            qty += comp['_instance_count']
+            qtys_by_board[comp['_board_name']] += comp['_instance_count']
+        for comp in group:
+            comp['_qty'] = qty
+            comp['_qtys_by_board'] = dict(qtys_by_board)
+
 
 def filter_groups(groups, filter_specs):
     filters = [_build_filter(fs) for fs in filter_specs]
