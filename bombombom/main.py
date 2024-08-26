@@ -2,6 +2,7 @@
 
 import typer
 import json
+import sys
 from typing import List, Annotated
 from pathlib import Path
 
@@ -10,6 +11,7 @@ from .kicad_bom import KicadBOM
 from .filter import filter_components, generate_fields_in_groups, filter_groups
 from .grouping import group_components, flatten_groups
 from .collapse import collapse_fields_in_flat_groups
+from .tabulate import tabulate
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -29,9 +31,9 @@ def cli(
     generate_fields_in_groups(groups, bomdef['generate_fields'])
     groups = filter_groups(groups, bomdef['filter'])
     groups = flatten_groups(groups)
-    groups = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
-
-    print(json.dumps(groups, indent=4, cls=SetEncoder))
+    field_data = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
+    # print(json.dumps(field_data, indent=4, cls=SetEncoder))
+    tabulate(field_data, bomdef['tabulate'], sys.stdout)
 
 def main():
     typer.run(cli)
