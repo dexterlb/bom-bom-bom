@@ -3,6 +3,7 @@
 import typer
 import json
 import sys
+import re
 from typing import List, Annotated
 from pathlib import Path
 
@@ -21,10 +22,10 @@ class SetEncoder(json.JSONEncoder):
 
 def cli(
     bomdef: Annotated[str, typer.Option(help='YAML file with the BOM definition')],
-    filenames: List[Path]
+    schematics: List[str]
 ):
     bomdef = parse_def_file(bomdef)
-    boms = [KicadBOM.read_from_sch_file(sch) for sch in filenames]
+    boms = [_bom_from_sch_arg(sch) for sch in schematics]
     components = sum([bom.components() for bom in boms], [])
     components = filter_components(components, bomdef['prefilter'])
     groups = group_components(components, bomdef['grouping'])
@@ -32,8 +33,14 @@ def cli(
     groups = filter_groups(groups, bomdef['filter'])
     groups = flatten_groups(groups)
     field_data = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
-    # print(json.dumps(field_data, indent=4, cls=SetEncoder))
     tabulate(field_data, bomdef['tabulate'], sys.stdout)
+
+def _bom_from_sch_arg(sch):
+    try:
+        _, count, sch = re.split(r'^([0-9]+)\*', sch)
+    except ValueError:
+        count = 1
+    return KicadBOM.read_from_sch_file(sch, board_count=int(count))
 
 def main():
     typer.run(cli)

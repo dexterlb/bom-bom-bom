@@ -21,7 +21,7 @@ def _generate_qty_fields_in_groups(groups):
         qtys_by_board = defaultdict(int)
         qty = 0
         for comp in group:
-            qty += comp['_instance_count']
+            qty += comp['_instance_count'] * comp['_board_count']
             qtys_by_board[comp['_board_name']] += comp['_instance_count']
         for comp in group:
             comp['_qty'] = qty
