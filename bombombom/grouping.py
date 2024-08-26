@@ -19,7 +19,7 @@ def group_components(components, group_settings):
     return dict(d)
 
 def _group_items(comp, group_settings):
-    field_text = comp[group_settings['key_field']]
+    field_text = comp.get(group_settings['key_field'], '')
     splitter = group_settings.get('split_by')
     if splitter:
         keys = field_text.split(splitter)
