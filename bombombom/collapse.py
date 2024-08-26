@@ -24,7 +24,7 @@ def _collapse_field(items, collapser):
         for item in items:
             k, v = item.split(collapser['split_prefix_by'], 1)
             prefix_lists[k] += [v]
-        prefix_strings = {k: collapser['join_values_by'].join(vs) for k, vs in prefix_lists.items()}
+        prefix_strings = {k: collapser['join_values_by'].join(_sorted_h(vs)) for k, vs in prefix_lists.items()}
         return collapser['join_groups_by'].join((
             k + collapser.get('join_prefix_by', collapser['split_prefix_by']) + prefix_strings[k]
             for k in sorted(prefix_lists.keys())
