@@ -1,4 +1,5 @@
 import csv
+from .utils import sorted_h
 
 def tabulate(field_data, settings, out):
     wr = csv.DictWriter(
@@ -9,5 +10,5 @@ def tabulate(field_data, settings, out):
     )
     if settings['header']:
         wr.writerow(settings['columns'])
-    for row in sorted(field_data.values(), key=lambda f: f[settings['sort_by']]):
+    for row in sorted_h(field_data.values(), settings['sort_type'], key=lambda f: f[settings['sort_by']]):
         wr.writerow(row)
