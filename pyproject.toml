@@ -13,6 +13,7 @@ dependencies = [
   "sexpdata",
   "strictyaml",
   "jinja2",
+  "requests",
 ]
 
 [tool.hatch.build.targets.wheel]

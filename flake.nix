@@ -27,6 +27,7 @@
             pkgs.python3Packages.sexpdata
             pkgs.python3Packages.strictyaml
             pkgs.python3Packages.jinja2
+            pkgs.python3Packages.requests
           ];
 
           meta = {

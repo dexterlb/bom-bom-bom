@@ -4,6 +4,7 @@ import typer
 import json
 import sys
 import re
+from enum import Enum
 from typing import List, Annotated
 from pathlib import Path
 
@@ -13,27 +14,52 @@ from .filter import filter_components, generate_fields_in_groups, filter_groups
 from .grouping import group_components, flatten_groups
 from .collapse import collapse_fields_in_flat_groups
 from .tabulate import tabulate
+from .partdb import PartDB
+
+class Action(str, Enum):
+    table = "table"
+    json_flat = "json_flat"
+    json_by_instance = "json_by_instance"
+    json_collapsed = "json_collapsed"
+    partdb_missing_parts = "partdb_missing_parts"
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
-            return list(obj)
+            return sorted(list(obj))
         return json.JSONEncoder.default(self, obj)
 
 def cli(
+    schematics: List[str],
     bomdef: Annotated[str, typer.Option(help='YAML file with the BOM definition')],
-    schematics: List[str]
+    do: Annotated[Action, typer.Option(help='What action to do')] = Action.table,
 ):
     bomdef = parse_def_file(bomdef)
     boms = [_bom_from_sch_arg(sch) for sch in schematics]
     components = sum([bom.components() for bom in boms], [])
     components = filter_components(components, bomdef['prefilter'])
     groups = group_components(components, bomdef['grouping'])
+    if 'partdb' in bomdef and bomdef['partdb']['match_parts']:
+        pdb = PartDB(bomdef['partdb'])
+        groups = pdb.add_partdb_fields_to_groups(groups)
     generate_fields_in_groups(groups, bomdef['generate_fields'])
     groups = filter_groups(groups, bomdef['filter'])
+    if do.value == Action.json_by_instance:
+        _dump_json(groups)
+        return
     groups = flatten_groups(groups)
+    if do.value == Action.json_flat:
+        _dump_json(field_data)
+        return
     field_data = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
-    tabulate(field_data, bomdef['tabulate'], sys.stdout)
+    if do.value == Action.json_collapsed:
+        _dump_json(field_data)
+        return
+    if do.value == Action.partdb_missing_parts:
+        _show_partdb_missing_parts(field_data)
+    if do.value == Action.table:
+        tabulate(field_data, bomdef['tabulate'], sys.stdout)
+        return
 
 def _bom_from_sch_arg(sch):
     try:
@@ -41,6 +67,9 @@ def _bom_from_sch_arg(sch):
     except ValueError:
         count = 1
     return KicadBOM.read_from_sch_file(sch, board_count=int(count))
+
+def _dump_json(data):
+    json.dump(data, sys.stdout, indent=4, cls=SetEncoder)
 
 def main():
     typer.run(cli)
