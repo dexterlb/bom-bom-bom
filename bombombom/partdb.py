@@ -23,6 +23,7 @@ class PartDB:
         return fields
 
     def _enrich_fields(self, fields):
+        fields['link'] = _url_join(self._settings['url'], f'en/part/{fields['id']}')
         fields['orderdetails_by_supplier'] = {}
         for ord in fields['orderdetails']:
             ord |= self._req(ord['@id'])

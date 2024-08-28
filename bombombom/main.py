@@ -21,7 +21,6 @@ class Action(str, Enum):
     json_flat = "json_flat"
     json_by_instance = "json_by_instance"
     json_collapsed = "json_collapsed"
-    partdb_missing_parts = "partdb_missing_parts"
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -55,8 +54,6 @@ def cli(
     if do.value == Action.json_collapsed:
         _dump_json(field_data)
         return
-    if do.value == Action.partdb_missing_parts:
-        _show_partdb_missing_parts(field_data)
     if do.value == Action.table:
         tabulate(field_data, bomdef['tabulate'], sys.stdout)
         return
