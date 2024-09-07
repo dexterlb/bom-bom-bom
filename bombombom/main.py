@@ -18,9 +18,10 @@ from .partdb import PartDB
 
 class Action(str, Enum):
     table = "table"
-    json_flat = "json_flat"
-    json_by_instance = "json_by_instance"
-    json_collapsed = "json_collapsed"
+    json_flat = "json-flat"
+    json_by_instance = "json-by-instance"
+    json_collapsed = "json-collapsed"
+    upload_bom_to_partdb = "upload-bom-to-partdb"
 
 class SetEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -31,6 +32,7 @@ class SetEncoder(json.JSONEncoder):
 def cli(
     schematics: List[str],
     bomdef: Annotated[str, typer.Option(help='YAML file with the BOM definition')],
+    project_name: Annotated[str, typer.Option(help='Name of partdb project (used when action is upload_bom_to_partdb)')] = '',
     do: Annotated[Action, typer.Option(help='What action to do')] = Action.table,
 ):
     bomdef = parse_def_file(bomdef)
@@ -53,6 +55,9 @@ def cli(
     field_data = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
     if do.value == Action.json_collapsed:
         _dump_json(field_data)
+        return
+    if do.value == Action.upload_bom_to_partdb:
+        pdb.upload_bom_to_partdb(project_name, field_data)
         return
     if do.value == Action.table:
         tabulate(field_data, bomdef['tabulate'], sys.stdout)
