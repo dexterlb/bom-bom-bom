@@ -48,16 +48,16 @@ def cli(
     if do.value == Action.json_by_instance:
         _dump_json(groups)
         return
-    groups = flatten_groups(groups)
-    if do.value == Action.json_flat:
-        _dump_json(field_data)
+    flat_groups = flatten_groups(groups)
+    if do.value == Action.upload_bom_to_partdb:
+        pdb.upload_bom_to_partdb(project_name, groups, flat_groups)
         return
-    field_data = collapse_fields_in_flat_groups(groups, bomdef['collapse'])
+    if do.value == Action.json_flat:
+        _dump_json(flat_groups)
+        return
+    field_data = collapse_fields_in_flat_groups(flat_groups, bomdef['collapse'])
     if do.value == Action.json_collapsed:
         _dump_json(field_data)
-        return
-    if do.value == Action.upload_bom_to_partdb:
-        pdb.upload_bom_to_partdb(project_name, field_data)
         return
     if do.value == Action.table:
         tabulate(field_data, bomdef['tabulate'], sys.stdout)
