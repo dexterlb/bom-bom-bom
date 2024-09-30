@@ -50,7 +50,8 @@ def cli(
         return
     flat_groups = flatten_groups(groups)
     if do.value == Action.upload_bom_to_partdb:
-        pdb.upload_bom_to_partdb(project_name, groups, flat_groups)
+        url = pdb.upload_bom_to_partdb(project_name, groups, flat_groups)
+        print(url)
         return
     if do.value == Action.json_flat:
         _dump_json(flat_groups)

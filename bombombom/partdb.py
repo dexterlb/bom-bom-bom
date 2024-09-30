@@ -27,6 +27,8 @@ class PartDB:
             entry = self._build_bom_entry(flat_group, unflat_groups, prj)
             self._req('api/project_bom_entries', method='POST', data=entry)
 
+        return self._make_url_path('en', 'project', prj['id'], 'info')
+
     def get_part_fields(self, key):
         fieldname = self._settings['search_field']
         fields = self._request_single_item('api/parts', fieldname, key)
@@ -78,7 +80,7 @@ class PartDB:
         return self._paginate(f'api/projects/{proj_id}/bom')
 
     def _enrich_fields(self, fields):
-        fields['link'] = _url_join(self._settings['url'], f'en/part/{fields['id']}')
+        fields['link'] = self._make_url_path('en', 'part', fields['id'])
         fields['orderdetails_by_supplier'] = {}
         for ord in fields['orderdetails']:
             ord |= self._req(ord['@id'])
@@ -120,7 +122,7 @@ class PartDB:
             'content-type': 'application/json',
             'Authorization': f'Bearer {self._settings['token']}'
         }
-        url = _url_join(self._settings['url'], path)
+        url = self._make_url_path(path)
 
         if params is None:
             params = {}
@@ -140,5 +142,8 @@ class PartDB:
         except:
             raise RuntimeError(f'non-json response from api: {resp.text}')
 
-def _url_join(*args):
-    return "/".join(arg.strip("/") for arg in args)
+    def _make_url_path(self, *items):
+        return _url_join(self._settings['url'], *items)
+
+def _url_join(*items):
+    return "/".join(item.strip("/") for item in (item if type(item) is str else str(item) for item in items))
